@@ -29,7 +29,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
 app.use("/api/auth", require("./routes/authRoutes"));
-app.use("/api/blogs", require("./routes/blogRoutes"));
+app.use("/api/v1/blog", require("./routes/blogRoutes"));
 app.use("/api/user", require("./routes/userRoutes"));
 app.use("/api/gallery", require("./routes/galleryRoutes"));
 app.use("/api/jyotirlingas", require("./routes/jyotirlingaRoutes"));

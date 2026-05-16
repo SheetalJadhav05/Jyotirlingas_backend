@@ -32,12 +32,22 @@ const getBlogById = async (req, res, next) => {
   }
 };
 
-// 3. CREATE BLOG (With Location & Image)
+// 3. CREATE BLOG (Vercel & Localhost Dono Ke Liye Fixed)
 const createBlog = async (req, res, next) => {
   try {
     const { title, content, location } = req.body;
 
-    const imagePath = req.file ? req.file.path.replace(/\\/g, "/") : "";
+    let imagePath = "";
+
+    // Agar Multer ne file ko memory me buffer ki tarah rakha h (Vercel compatible)
+    if (req.file && req.file.buffer) {
+      const base64Image = req.file.buffer.toString("base64");
+      imagePath = `data:${req.file.mimetype};base64,${base64Image}`;
+    }
+    // Agar local par chal raha h aur folder path h
+    else if (req.file && req.file.path) {
+      imagePath = req.file.path.replace(/\\/g, "/");
+    }
 
     const newBlog = await Blog.create({
       title,
@@ -57,7 +67,7 @@ const createBlog = async (req, res, next) => {
   }
 };
 
-// 4. UPDATE BLOG (With Location)
+// 4. UPDATE BLOG
 const updateBlog = async (req, res, next) => {
   try {
     let blog = await Blog.findById(req.params.id);
@@ -75,11 +85,16 @@ const updateBlog = async (req, res, next) => {
     const updateData = {
       title: req.body.title,
       content: req.body.content,
-      location: req.body.location, // ✅ Location update support
+      location: req.body.location,
     };
 
     if (req.file) {
-      updateData.image = req.file.path.replace(/\\/g, "/");
+      if (req.file.buffer) {
+        const base64Image = req.file.buffer.toString("base64");
+        updateData.image = `data:${req.file.mimetype};base64,${base64Image}`;
+      } else if (req.file.path) {
+        updateData.image = req.file.path.replace(/\\/g, "/");
+      }
     }
 
     const updatedBlog = await Blog.findByIdAndUpdate(
